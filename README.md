@@ -17,6 +17,7 @@ A robust and scalable Library Management System API built with **Express.js**, *
 - **🔧 Middleware:** Custom pre/post hooks for business logic
 - **📚 Methods:** Mongoose static and instance methods
 - **🚨 Error Handling:** Comprehensive error handling and user feedback
+- **🔄 Automatic Updates:** Smart availability management and copy tracking
 
 ## 🛠 Technology Stack
 
@@ -35,6 +36,7 @@ A robust and scalable Library Management System API built with **Express.js**, *
 |--------|----------|-------------|
 | `POST` | `/api/books` | Create a new book |
 | `GET` | `/api/books` | Get all books with filtering & pagination |
+| `GET` | `/api/books/genre/:genre` | Get books by specific genre (static method demo) |
 | `GET` | `/api/books/:bookId` | Get book by ID |
 | `PUT` | `/api/books/:bookId` | Update book information |
 | `DELETE` | `/api/books/:bookId` | Delete a book |
@@ -45,6 +47,7 @@ A robust and scalable Library Management System API built with **Express.js**, *
 |--------|----------|-------------|
 | `POST` | `/api/borrow` | Borrow books |
 | `GET` | `/api/borrow` | Get borrowing summary with aggregation |
+| `DELETE` | `/api/borrow/:borrowId` | Cancel borrowing (middleware demo) |
 
 ### 🔍 Query Parameters
 
@@ -58,6 +61,29 @@ GET /api/books?filter=GENRE&sortBy=createdAt&sort=asc|desc&limit=5
 - `sortBy`: Sort field (e.g., `createdAt`, `title`, `author`)
 - `sort`: Sort order (`asc` or `desc`)
 - `limit`: Number of results per page
+
+## 🔧 Advanced Features
+
+### Mongoose Middleware (Pre/Post Hooks)
+
+#### Book Model Middleware
+- **Pre-save Hook:** Automatically updates book availability when copies change
+- **Pre-validate Hook:** Ensures ISBN uniqueness across all books
+- **Post-save Hook:** Logs book operations for monitoring
+
+#### Borrow Model Middleware
+- **Pre-save Hook:** Validates book availability and due date before borrowing
+- **Post-save Hook:** Automatically updates book copies after successful borrowing
+- **Post-remove Hook:** Restores book copies when borrowing is cancelled
+
+### Mongoose Methods
+
+#### Static Methods
+- `findByGenre(genre)`: Find all available books by genre
+- `findAvailableBooks()`: Find all currently available books
+
+#### Instance Methods
+- `updateAvailability()`: Updates book availability based on current copies
 
 ## 📝 Data Models
 
@@ -95,6 +121,8 @@ Valid genres: `FICTION`, `NON_FICTION`, `SCIENCE`, `HISTORY`, `BIOGRAPHY`, `FANT
 - Cannot borrow more copies than available
 - Book availability automatically updates when copies reach 0
 - Borrowing summary includes book title, ISBN, and total quantity
+- Due date must be in the future
+- Automatic copy restoration when borrowing is cancelled
 
 ## 🧪 API Examples
 
@@ -126,6 +154,18 @@ Content-Type: application/json
   "quantity": 2,
   "dueDate": "2025-07-18T00:00:00.000Z"
 }
+```
+
+### Get Books by Genre (Static Method Demo)
+
+```bash
+GET /api/books/genre/SCIENCE
+```
+
+### Cancel Borrowing (Middleware Demo)
+
+```bash
+DELETE /api/borrow/64bc4a0f9e1c2d3f4b5a6789
 ```
 
 ### Get Books with Filtering
@@ -215,7 +255,7 @@ npm start
 src/
 ├── app/
 │   ├── controllers/     # Request handlers
-│   ├── models/         # Mongoose schemas
+│   ├── models/         # Mongoose schemas with middleware
 │   └── route/          # API routes
 ├── config/             # Configuration files
 ├── index.ts            # Application entry point
@@ -226,9 +266,10 @@ src/
 
 - **TypeScript:** Full type safety and modern JavaScript features
 - **Hot Reload:** Automatic server restart on file changes
-- **ESLint:** Code quality and consistency
 - **MongoDB Aggregation:** Advanced data processing and analytics
 - **Middleware Hooks:** Custom business logic integration
+- **Static/Instance Methods:** Mongoose method implementations
+- **Automatic Validation:** Pre/post save hooks for data integrity
 
 ## 📊 Performance Features
 
@@ -236,6 +277,7 @@ src/
 - **Aggregation Pipelines:** Efficient data processing
 - **Connection Pooling:** Database connection optimization
 - **Error Boundaries:** Graceful error handling
+- **Middleware Automation:** Reduced manual validation code
 
 ## 🤝 Contributing
 
@@ -245,11 +287,13 @@ src/
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-
-
 ## 👨‍💻 Author
 
 **Aysha Urmi** - [GitHub Profile](https://github.com/AyshaUrmi0)
+
+---
+
+⭐ **Star this repository if you find it helpful!**
 
 
 

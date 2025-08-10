@@ -5,21 +5,8 @@ import borrowModel from '../models/borrow.model';
 export const borrowBook = async (req: Request, res: Response): Promise<void> => {
   try {
     const { book: bookId, quantity, dueDate } = req.body;
-    const book = await bookModel.findById(bookId);
-
-    if (!book || book.copies < quantity) {
-      res.status(400).json({
-        success: false,
-        message: 'Not enough copies available',
-        error: 'Insufficient copies'
-      });
-      return;  // early exit, no further processing
-    }
-
-    book.copies -= quantity;
-    if (book.copies === 0) book.available = false;
-    await book.save();
-
+    
+    // The middleware will handle all validations automatically
     const borrow = await borrowModel.create({ book: bookId, quantity, dueDate });
 
     res.status(201).json({
@@ -27,8 +14,24 @@ export const borrowBook = async (req: Request, res: Response): Promise<void> => 
       message: 'Book borrowed successfully',
       data: borrow
     });
-  } catch (error) {
-    res.status(400).json({ success: false, message: 'Borrow failed', error });
+  } catch (error: any) {
+    // Handle validation errors from middleware
+    if (error.name === 'ValidationError') {
+      res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        error: {
+          name: error.name,
+          errors: error.errors
+        }
+      });
+    } else {
+      res.status(400).json({ 
+        success: false, 
+        message: error.message || 'Borrow failed', 
+        error: error.message 
+      });
+    }
   }
 };
 
@@ -68,5 +71,35 @@ export const getBorrowedSummary = async (_req: Request, res: Response): Promise<
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Summary failed', error });
+  }
+};
+
+// New endpoint to demonstrate middleware functionality
+export const cancelBorrow = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { borrowId } = req.params;
+    
+    const borrow = await borrowModel.findByIdAndDelete(borrowId);
+    if (!borrow) {
+      res.status(404).json({
+        success: false,
+        message: 'Borrow record not found',
+        error: 'Borrow with this ID does not exist'
+      });
+      return;
+    }
+
+    // The post-remove middleware will automatically restore book copies
+    res.json({
+      success: true,
+      message: 'Borrow cancelled successfully',
+      data: null
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error cancelling borrow', 
+      error: error instanceof Error ? error.message : error 
+    });
   }
 };
