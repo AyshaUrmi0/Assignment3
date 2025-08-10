@@ -7,9 +7,8 @@ A robust Library Management System API built with **Express.js**, **TypeScript**
 
 ## 🚀 Live Project
 
-**🔗 Live URL:** https://l2assignment03-five.vercel.app/ 
-**📁 GitHub Repository:**https://github.com/AyshaUrmi0/Assignment3.git
----
+**🔔 Live URL:** [View Live App](https://l2assignment03-five.vercel.app/)
+**📁 GitHub Repository:** [View Source Code](https://github.com/AyshaUrmi0/Assignment3.git)
 
 ## 📦 Features
 
